@@ -32,6 +32,44 @@ static int cmd_c(char *args) {
   return 0;
 }
 
+static int cmd_si(char *args) {
+  uint64_t n = 1;
+
+  if (args != NULL) {
+    char *endptr = NULL;
+    n = strtoull(args, &endptr, 10);
+
+    if (endptr == args || n == 0) {
+      printf("Usage: si [N]\n");
+      return 0;
+    }
+  }
+
+  cpu_exec(n);
+  return 0;
+}
+
+static int cmd_info(char *args) {
+  char *subcmd = (args == NULL ? NULL : strtok(args, " "));
+
+  if (subcmd == NULL) {
+    printf("Usage: info r\n");
+    return 0;
+  }
+
+  if (strcmp(subcmd, "r") == 0) {
+    int i;
+    for (i = 0; i < 8; i ++) {
+      printf("%s\t0x%08x\t%u\n", regsl[i], reg_l(i), reg_l(i));
+    }
+    printf("eip\t0x%08x\t%u\n", cpu.eip, cpu.eip);
+    return 0;
+  }
+
+  printf("Unknown info subcommand '%s'\n", subcmd);
+  return 0;
+}
+
 static int cmd_q(char *args) {
   return -1;
 }
@@ -45,6 +83,8 @@ static struct {
 } cmd_table [] = {
   { "help", "Display informations about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
+  { "si", "Step through execution by N instructions (default 1)", cmd_si },
+  { "info", "Print program status, e.g. info r", cmd_info },
   { "q", "Exit NEMU", cmd_q },
 
   /* TODO: Add more commands */
