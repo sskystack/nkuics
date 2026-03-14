@@ -28,8 +28,28 @@ void cpu_exec(uint64_t n) {
     exec_wrapper(print_flag);
 
 #ifdef DEBUG
-    /* TODO: check watchpoints here. */
+    /* Check watchpoints here */
+    WP *wp = head;
+    while (wp != NULL) {
+      bool success = false;
+      uint32_t new_val = expr(wp->expr, &success);
+      if (!success) {
+        printf("Failed to evaluate watchpoint %d: %s\n", wp->NO, wp->expr);
+        wp = wp->next;
+        continue;
+      }
 
+      if (new_val != wp->old_val) {
+        printf("Watchpoint %d triggered: %s\n", wp->NO, wp->expr);
+        printf("Old value = %u\n", wp->old_val);
+        printf("New value = %u\n", new_val);
+        wp->old_val = new_val;
+        nemu_state = NEMU_STOP;
+        return;
+      }
+
+      wp = wp->next;
+    }
 #endif
 
 #ifdef HAS_IOE
