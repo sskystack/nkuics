@@ -19,8 +19,8 @@ void init_wp_pool() {
 }
 
 /* TODO: Implement the functionality of watchpoint */
-WP* new_wp(char *expr) {
-  if (expr == NULL || expr[0] == '\0') {
+WP* new_wp(char *e) {
+  if (e == NULL || e[0] == '\0') {
     printf("Usage: w EXPR\n");
     return NULL;
   }
@@ -33,12 +33,22 @@ WP* new_wp(char *expr) {
   WP *wp = free_;
   free_ = free_->next;
 
+  strncpy(wp->expr, e, sizeof(wp->expr) - 1);
+  wp->expr[sizeof(wp->expr) - 1] = '\0';
+
+  bool success = false;
+  uint32_t val = expr(wp->expr, &success);
+  if (!success) {
+    printf("Bad expression: %s\n", wp->expr);
+    wp->next = free_;
+    free_ = wp;
+    return NULL;
+  }
+
+  wp->old_val = val;
+
   wp->next = head;
   head = wp;
-
-  strncpy(wp->expr, expr, sizeof(wp->expr) - 1);
-  wp->expr[sizeof(wp->expr) - 1] = '\0';
-  wp->old_val = 0;
 
   return wp;
 }

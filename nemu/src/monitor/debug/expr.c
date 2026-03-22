@@ -15,7 +15,7 @@ enum {
   TK_AND,     // &&
   TK_NUM,     // decimal number
   TK_HEX,     // hex number
-  TK_REG,     // register like $eax
+  TK_REG,     // register like $eax or eax
   TK_DEREF,   // pointer dereference (unary *)
   TK_NEG,     // negation (unary -)
 };
@@ -39,7 +39,8 @@ static struct rule {
   {"\\)",                  ')'},        // right paren
   {"0[xX][0-9a-fA-F]+",   TK_HEX},    // hex number
   {"[0-9]+",               TK_NUM},    // decimal number
-  {"\\$[a-zA-Z][a-zA-Z0-9]*", TK_REG}, // register
+  {"\\$[a-zA-Z][a-zA-Z0-9]*", TK_REG}, // register with '$'
+  {"[a-zA-Z][a-zA-Z0-9]*", TK_REG},     // register without '$'
 };
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]) )
@@ -213,7 +214,10 @@ static uint32_t eval(int p, int q, bool *success) {
       case TK_HEX:
         return (uint32_t)strtoul(tokens[p].str, NULL, 16);
       case TK_REG: {
-        const char *name = tokens[p].str + 1; /* skip '$' */
+        const char *name = tokens[p].str;
+        if (name[0] == '$') {
+          name++; /* optional '$' prefix */
+        }
         int i;
         if (strcmp(name, "eip") == 0) return cpu.eip;
         for (i = 0; i < 8; i++) {
