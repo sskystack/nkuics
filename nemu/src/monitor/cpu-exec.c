@@ -29,7 +29,7 @@ void cpu_exec(uint64_t n) {
     exec_wrapper(print_flag);
 
 #ifdef DEBUG
-    /* Check watchpoints here */
+    /* TODO: check watchpoints here. */
     if (check_watchpoints()) {
       nemu_state = NEMU_STOP;
       return;

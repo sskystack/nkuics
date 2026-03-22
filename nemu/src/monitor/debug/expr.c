@@ -10,6 +10,7 @@
 enum {
   TK_NOTYPE = 256,
   TK_EQ,      // ==
+  /* TODO: Add more token types */
   TK_NEQ,     // !=
   TK_AND,     // &&
   TK_NUM,     // decimal number
@@ -23,6 +24,9 @@ static struct rule {
   char *regex;
   int token_type;
 } rules[] = {
+  /* TODO: Add more rules.
+   * Pay attention to the precedence level of different rules.
+   */
   {" +",                   TK_NOTYPE},  // spaces
   {"==",                   TK_EQ},      // equal (before = )
   {"!=",                   TK_NEQ},     // not equal
@@ -91,6 +95,7 @@ static bool make_token(char *e) {
          */
 
         switch (rules[i].token_type) {
+          //default: TODO();
           case TK_NOTYPE:
             break; // skip spaces
           case TK_NUM:
@@ -162,6 +167,34 @@ static int get_precedence(int type) {
   }
 }
 
+static int dominant_operator(int p, int q) {
+  int op = -1;
+  int op_prec = 100;
+  int paren_depth = 0;
+  int i;
+
+  for (i = p; i <= q; i++) {
+    if (tokens[i].type == '(') { paren_depth++; continue; }
+    if (tokens[i].type == ')') { paren_depth--; continue; }
+    if (paren_depth > 0) continue;
+
+    // unary operators are handled separately
+    if (tokens[i].type == TK_NEG || tokens[i].type == TK_DEREF) continue;
+
+    int prec = get_precedence(tokens[i].type);
+    if (prec < 0) continue;
+
+    // choose the rightmost operator among the same precedence
+    // to keep left associativity in recursive split
+    if (prec <= op_prec) {
+      op = i;
+      op_prec = prec;
+    }
+  }
+
+  return op;
+}
+
 static uint32_t eval(int p, int q, bool *success);
 
 static uint32_t eval(int p, int q, bool *success) {
@@ -171,7 +204,7 @@ static uint32_t eval(int p, int q, bool *success) {
     return 0;
   }
 
-  if (p == q) {
+  else if (p == q) {
     /* Single token */
     *success = true;
     switch (tokens[p].type) {
@@ -197,69 +230,53 @@ static uint32_t eval(int p, int q, bool *success) {
     }
   }
 
-  /* Unary operators at position p */
-  if (tokens[p].type == TK_NEG) {
-    uint32_t val = eval(p + 1, q, success);
-    return (uint32_t)(-(int32_t)val);
-  }
-  if (tokens[p].type == TK_DEREF) {
-    uint32_t addr = eval(p + 1, q, success);
-    if (!*success) return 0;
-    return vaddr_read(addr, 4);
-  }
-
-  /* Expression wrapped in parentheses */
-  if (check_parentheses(p, q)) {
+  else if (check_parentheses(p, q)) {
     return eval(p + 1, q - 1, success);
   }
 
- 
-  int op = -1;
-  int op_prec = 100;
-  int paren_depth = 0;
-  int i;
-  for (i = p; i <= q; i++) {
-    if (tokens[i].type == '(') { paren_depth++; continue; }
-    if (tokens[i].type == ')') { paren_depth--; continue; }
-    if (paren_depth > 0) continue;
-    if (tokens[i].type == TK_NEG || tokens[i].type == TK_DEREF) continue;
-    int prec = get_precedence(tokens[i].type);
-    if (prec < 0) continue;
-    
-    if (prec <= op_prec) {
-      op = i;
-      op_prec = prec;
+  else {
+    // Unary operators at position p
+    if (tokens[p].type == TK_NEG) {
+      uint32_t val = eval(p + 1, q, success);
+      if (!*success) return 0;
+      return (uint32_t)(-(int32_t)val);
     }
-  }
+    if (tokens[p].type == TK_DEREF) {
+      uint32_t addr = eval(p + 1, q, success);
+      if (!*success) return 0;
+      return vaddr_read(addr, 4);
+    }
 
-  if (op == -1) {
-    printf("No valid operator found\n");
-    *success = false;
-    return 0;
-  }
-
-  uint32_t lval = eval(p, op - 1, success);
-  if (!*success) return 0;
-  uint32_t rval = eval(op + 1, q, success);
-  if (!*success) return 0;
-
-  switch (tokens[op].type) {
-    case '+':    return lval + rval;
-    case '-':    return lval - rval;
-    case '*':    return lval * rval;
-    case '/':
-      if (rval == 0) {
-        printf("Division by zero\n");
-        *success = false;
-        return 0;
-      }
-      return lval / rval;
-    case TK_EQ:  return lval == rval;
-    case TK_NEQ: return lval != rval;
-    case TK_AND: return lval && rval;
-    default:
+    int op = dominant_operator(p, q);
+    if (op == -1) {
+      printf("No valid operator found\n");
       *success = false;
       return 0;
+    }
+
+    uint32_t val1 = eval(p, op - 1, success);
+    if (!*success) return 0;
+    uint32_t val2 = eval(op + 1, q, success);
+    if (!*success) return 0;
+
+    switch (tokens[op].type) {
+      case '+': return val1 + val2;
+      case '-': return val1 - val2;
+      case '*': return val1 * val2;
+      case '/':
+        if (val2 == 0) {
+          printf("Division by zero\n");
+          *success = false;
+          return 0;
+        }
+        return val1 / val2;
+      case TK_EQ:  return val1 == val2;
+      case TK_NEQ: return val1 != val2;
+      case TK_AND: return val1 && val2;
+      default:
+        *success = false;
+        return 0;
+    }
   }
 }
 
@@ -269,6 +286,13 @@ uint32_t expr(char *e, bool *success) {
     return 0;
   }
 
+  /* TODO: Insert codes to evaluate the expression. */
+  // TODO();
+
+  if (nr_token == 0) {
+    *success = false;
+    return 0;
+  }
   
   int i;
   for (i = 0; i < nr_token; i++) {
