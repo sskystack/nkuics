@@ -114,6 +114,8 @@ static int cmd_q(char *args) {
 }
 
 static int cmd_help(char *args);
+static int cmd_p(char *args);
+static int cmd_x(char *args);
 
 static struct {
   char *name;
@@ -124,6 +126,8 @@ static struct {
   { "c", "Continue the execution of the program", cmd_c },
   { "si", "Step through execution by N instructions (default 1)", cmd_si },
   { "info", "Print program status, e.g. info r", cmd_info },
+  { "p", "Evaluate expression, usage: p EXPR", cmd_p },
+  { "x", "Scan memory, usage: x N EXPR", cmd_x },
   { "w", "Set a watchpoint, usage: w EXPR", cmd_w },
   { "d", "Delete a watchpoint, usage: d N", cmd_d },
   { "q", "Exit NEMU", cmd_q },

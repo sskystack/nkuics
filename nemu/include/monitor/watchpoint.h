@@ -17,5 +17,6 @@ void init_wp_pool();
 WP* new_wp(char *expr);
 bool free_wp(int no);
 void print_wp();
+bool check_watchpoints();
 
 #endif
