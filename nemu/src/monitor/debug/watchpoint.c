@@ -18,6 +18,7 @@ void init_wp_pool() {
   free_ = wp_pool;
 }
 
+/* TODO: Implement the functionality of watchpoint */
 WP* new_wp(char *expr) {
   if (expr == NULL || expr[0] == '\0') {
     printf("Usage: w EXPR\n");
