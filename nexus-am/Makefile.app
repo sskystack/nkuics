@@ -12,7 +12,7 @@ INC_DIR += $(addsuffix /include/, $(addprefix $(AM_HOME)/libs/, $(LIBS)))
 
 $(shell mkdir -p $(DST_DIR))
 
-LIBS += klib # link klib by default
+#LIBS += klib # link klib by default
 
 include $(AM_HOME)/Makefile.compile
 
