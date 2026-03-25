@@ -18,9 +18,10 @@ include $(AM_HOME)/Makefile.compile
 
 archive: $(ARCHIVE)
 
-$(ARCHIVE): $(OBJS)
+$(ARCHIVE): $(OBJS) 
+	@mkdir -p $(dir $@)
 	@echo + AR $@
-	@ar rcs $(ARCHIVE) $(OBJS)
+	@ar rcs $@ $(OBJS)
 
 .PHONY: clean archive
 clean: 
