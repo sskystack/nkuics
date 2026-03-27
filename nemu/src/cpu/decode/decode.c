@@ -268,6 +268,11 @@ make_DHelper(a2O) {
   decode_op_O(eip, id_dest, false);
 }
 
+make_DHelper(a2r) {
+  decode_op_a(eip, id_src, true);
+  decode_op_r(eip, id_dest, true);
+}
+
 make_DHelper(J) {
   decode_op_SI(eip, id_dest, false);
   // the target address can be computed in the decode stage

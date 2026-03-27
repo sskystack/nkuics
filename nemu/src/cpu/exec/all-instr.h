@@ -1,6 +1,7 @@
 #include "cpu/exec.h"
 
 make_EHelper(mov);
+make_EHelper(xchg);
 make_EHelper(lea);
 make_EHelper(push);
 make_EHelper(pop);

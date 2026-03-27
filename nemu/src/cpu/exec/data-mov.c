@@ -5,6 +5,14 @@ make_EHelper(mov) {
   print_asm_template2(mov);
 }
 
+make_EHelper(xchg) {
+  rtl_mv(&t0, &id_dest->val);
+  operand_write(id_dest, &id_src->val);
+  operand_write(id_src, &t0);
+
+  print_asm_template2(xchg);
+}
+
 make_EHelper(push) {
   rtl_push(&id_dest->val);
 
