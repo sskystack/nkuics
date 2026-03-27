@@ -275,7 +275,10 @@ make_DHelper(J) {
 }
 
 make_DHelper(push_SI) {
+  int saved_width = id_dest->width;
+  id_dest->width = 1;
   decode_op_SI(eip, id_dest, true);
+  id_dest->width = saved_width;
 }
 
 make_DHelper(in_I2a) {
