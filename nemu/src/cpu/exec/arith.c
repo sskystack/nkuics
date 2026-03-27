@@ -7,7 +7,29 @@ make_EHelper(add) {
 }
 
 make_EHelper(sub) {
-  TODO();
+  rtl_sub(&t2, &id_dest->val, &id_src->val);
+  if (id_dest->width != 4) {
+    rtl_andi(&t2, &t2, id_dest->width == 1 ? 0xff : 0xffff);
+  }
+  operand_write(id_dest, &t2);
+
+  rtl_update_ZFSF(&t2, id_dest->width);
+
+  // 判断是否发生借位（无符号比较），结果存储在 t0 中
+  rtl_sltu(&t0, &id_dest->val, &id_src->val);
+  // 设置进位标志 CF。如果发生借位（即被减数小于减数），t0 被设置为 1；否则为 0。
+  rtl_set_CF(&t0);
+
+  // 计算被减数和减数的按位异或，结果存储在 t0 中。这一步是为了后续计算溢出标志（OF，Overflow Flag）做准备。
+  rtl_xor(&t0, &id_dest->val, &id_src->val);
+  // 计算被减数和结果的按位异或，结果存储在 t1 中
+  rtl_xor(&t1, &id_dest->val, &t2);
+  // 将上述两个异或结果按位与，结果存储在 t0 中
+  rtl_and(&t0, &t0, &t1);
+  // 提取 t0 的最高有效位（符号位），结果存储在 t0 中
+  rtl_msb(&t0, &t0, id_dest->width);
+  // 设置溢出标志 OF，如果发生溢出，OF 被设置为 1；否则为 0。
+  rtl_set_OF(&t0);
 
   print_asm_template2(sub);
 }
