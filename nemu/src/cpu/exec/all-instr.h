@@ -30,6 +30,7 @@ make_EHelper(sar);
 make_EHelper(shl);
 make_EHelper(not);
 make_EHelper(idiv);
+make_EHelper(div);
 
 make_EHelper(call);
 make_EHelper(jmp);
