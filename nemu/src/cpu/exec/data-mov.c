@@ -46,11 +46,14 @@ make_EHelper(leave) {
 
 make_EHelper(cltd) {
   if (decoding.is_operand_size_16) {
-    rtl_sext(&cpu.edx, &cpu.eax, 2);
-    cpu.edx &= 0xffff;
+    rtl_msb(&t0, &cpu.eax, 2);
+    rtl_sub(&t0, &tzero, &t0);
+    cpu.edx = t0 & 0xffff;
   }
   else {
-    rtl_sext(&cpu.edx, &cpu.eax, 4);
+    rtl_msb(&t0, &cpu.eax, 4);
+    rtl_sub(&t0, &tzero, &t0);
+    cpu.edx = t0;
   }
 
   print_asm(decoding.is_operand_size_16 ? "cwtl" : "cltd");
