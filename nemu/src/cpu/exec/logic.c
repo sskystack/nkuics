@@ -2,6 +2,9 @@
 
 make_EHelper(test) {
   rtl_and(&t2, &id_dest->val, &id_src->val);
+  if (id_dest->width != 4) {
+    rtl_andi(&t2, &t2, id_dest->width == 1 ? 0xff : 0xffff);
+  }
   rtl_update_ZFSF(&t2, id_dest->width);
   rtl_set_CF(&tzero);
   rtl_set_OF(&tzero);
@@ -11,6 +14,9 @@ make_EHelper(test) {
 
 make_EHelper(and) {
   rtl_and(&t2, &id_dest->val, &id_src->val);
+  if (id_dest->width != 4) {
+    rtl_andi(&t2, &t2, id_dest->width == 1 ? 0xff : 0xffff);
+  }
   operand_write(id_dest, &t2);
   rtl_update_ZFSF(&t2, id_dest->width);
   rtl_set_CF(&tzero);
@@ -21,6 +27,9 @@ make_EHelper(and) {
 
 make_EHelper(xor) {
   rtl_xor(&t2, &id_dest->val, &id_src->val);
+  if (id_dest->width != 4) {
+    rtl_andi(&t2, &t2, id_dest->width == 1 ? 0xff : 0xffff);
+  }
   operand_write(id_dest, &t2);
   rtl_update_ZFSF(&t2, id_dest->width);
   rtl_set_CF(&tzero);
