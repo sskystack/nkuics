@@ -279,14 +279,12 @@ make_EHelper(idiv) {
       dividend = (int16_t)reg_w(R_AX);
       divisor = (int8_t)id_dest->val;
       if (divisor == 0) {
-        nemu_state = NEMU_END;
         print_asm_template1(idiv);
         return;
       }
       quotient = dividend / divisor;
       remainder = dividend % divisor;
       if (quotient < INT8_MIN || quotient > INT8_MAX) {
-        nemu_state = NEMU_END;
         print_asm_template1(idiv);
         return;
       }
@@ -299,14 +297,12 @@ make_EHelper(idiv) {
       dividend = (int32_t)(((uint32_t)reg_w(R_DX) << 16) | reg_w(R_AX));
       divisor = (int16_t)id_dest->val;
       if (divisor == 0) {
-        nemu_state = NEMU_END;
         print_asm_template1(idiv);
         return;
       }
       quotient = dividend / divisor;
       remainder = dividend % divisor;
       if (quotient < INT16_MIN || quotient > INT16_MAX) {
-        nemu_state = NEMU_END;
         print_asm_template1(idiv);
         return;
       }
@@ -319,14 +315,12 @@ make_EHelper(idiv) {
       dividend = ((int64_t)(int32_t)cpu.edx << 32) | (uint32_t)cpu.eax;
       divisor = (int32_t)id_dest->val;
       if (divisor == 0) {
-        nemu_state = NEMU_END;
         print_asm_template1(idiv);
         return;
       }
       quotient = dividend / divisor;
       remainder = dividend % divisor;
       if (quotient < INT32_MIN || quotient > INT32_MAX) {
-        nemu_state = NEMU_END;
         print_asm_template1(idiv);
         return;
       }
