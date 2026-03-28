@@ -87,7 +87,12 @@ make_EHelper(setcc) {
 }
 
 make_EHelper(not) {
-  TODO();
+  rtl_mv(&t2, &id_dest->val);
+  rtl_not(&t2);
+  if (id_dest->width != 4) {
+    rtl_andi(&t2, &t2, id_dest->width == 1 ? 0xff : 0xffff);
+  }
+  operand_write(id_dest, &t2);
 
   print_asm_template1(not);
 }
