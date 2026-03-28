@@ -6,6 +6,7 @@ make_EHelper(xchg);
 make_EHelper(lea);
 make_EHelper(push);
 make_EHelper(pop);
+make_EHelper(cltd);
 
 make_EHelper(add);
 make_EHelper(adc);
