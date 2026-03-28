@@ -40,6 +40,8 @@ make_EHelper(jmp_rm);
 make_EHelper(call_rm);
 
 make_EHelper(operand_size);
+make_EHelper(in);
+make_EHelper(out);
 
 make_EHelper(inv);
 make_EHelper(nemu_trap);
