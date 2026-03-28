@@ -77,7 +77,21 @@ make_EHelper(inc) {
 }
 
 make_EHelper(dec) {
-  TODO();
+  rtl_li(&t1, 1);
+  rtl_sub(&t2, &id_dest->val, &t1);
+  if (id_dest->width != 4) {
+    rtl_andi(&t2, &t2, id_dest->width == 1 ? 0xff : 0xffff);
+  }
+  operand_write(id_dest, &t2);
+
+  rtl_update_ZFSF(&t2, id_dest->width);
+
+  // OF for dec: same as sub with src = 1
+  rtl_xor(&t0, &id_dest->val, &t1);
+  rtl_xor(&t3, &id_dest->val, &t2);
+  rtl_and(&t0, &t0, &t3);
+  rtl_msb(&t0, &t0, id_dest->width);
+  rtl_set_OF(&t0);
 
   print_asm_template1(dec);
 }
