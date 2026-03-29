@@ -54,6 +54,10 @@ void _draw_rect(const uint32_t *pixels, int x, int y, int w, int h) {
   }
 }
 
+void _draw_p(int x, int y, uint32_t color) {
+  _draw_rect(&color, x, y, 1, 1);
+}
+
 void _draw_sync() {
   SDL_UpdateTexture(texture, NULL, fb, W * sizeof(Uint32));
   SDL_RenderClear(renderer);
