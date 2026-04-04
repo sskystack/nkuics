@@ -7,21 +7,14 @@
 #define PGSIZE    4096    // Bytes mapped by a page
 
 struct _RegSet {
-  uintptr_t edi, esi, ebp, esp;
-  uintptr_t ebx, edx, ecx, eax;
-  uintptr_t irq, error_code;
-  uintptr_t eip, cs, eflags;
+  uintptr_t esi, ebx, eax, eip, edx, error_code, eflags, ecx, cs, esp, edi, ebp;
+  int       irq;
 };
 
-#define REG1(r) ((r)->eax)
-#define REG2(r) ((r)->ebx)
-#define REG3(r) ((r)->ecx)
-#define REG4(r) ((r)->edx)
-
-#define SYSCALL_ARG1(r) ((r)->eax)
-#define SYSCALL_ARG2(r) ((r)->ebx)
-#define SYSCALL_ARG3(r) ((r)->ecx)
-#define SYSCALL_ARG4(r) ((r)->edx)
+#define SYSCALL_ARG1(r) 0
+#define SYSCALL_ARG2(r) 0
+#define SYSCALL_ARG3(r) 0
+#define SYSCALL_ARG4(r) 0
 
 #ifdef __cplusplus
 extern "C" {

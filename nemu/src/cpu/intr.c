@@ -14,7 +14,7 @@ void raise_intr(uint8_t NO, vaddr_t ret_addr) {
   tmp = cpu.eflags;
   rtl_push(&tmp);
 
-  tmp = 0;
+  tmp = 8;
   rtl_push(&tmp);
 
   tmp = ret_addr;
@@ -25,8 +25,4 @@ void raise_intr(uint8_t NO, vaddr_t ret_addr) {
 
 void dev_raise_intr() {
   raise_intr(0x81, cpu.eip);
-}
-
-void dev_raise_io_intr() {
-  raise_intr(0x82, cpu.eip);
 }
