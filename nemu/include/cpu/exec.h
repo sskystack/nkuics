@@ -21,6 +21,10 @@ static inline uint32_t instr_fetch(vaddr_t *eip, int len) {
   return instr;
 }
 
+void raise_intr(uint8_t NO, vaddr_t ret_addr);
+void dev_raise_intr();
+void dev_raise_io_intr();
+
 void rtl_setcc(rtlreg_t*, uint8_t);
 
 static inline const char* get_cc_name(int subcode) {
