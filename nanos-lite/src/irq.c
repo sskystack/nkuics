@@ -8,7 +8,9 @@ static _RegSet* do_event(_Event e, _RegSet* r) {
     case _EVENT_SYSCALL: return do_syscall(r);
     case _EVENT_IRQ_TIME:
     case _EVENT_IRQ_IODEV: return schedule(r);
-    default: panic("Unhandled event ID = %d", e.event);
+     default: 
+       panic("Unhandled event ID = %d", e.event);
+       return r; // Fallback return path added
   }
 }
 
