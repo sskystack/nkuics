@@ -125,12 +125,19 @@ make_EHelper(neg) {
   rtl_update_ZFSF(&t2, id_dest->width);
 
   /* CF is set iff original operand is non-zero */
-  rtl_setrelop(RELOP_NE, &t1, &id_dest->val, &t0);
+  rtl_neq0(&t1, &id_dest->val);
   rtl_set_CF(&t1);
 
   /* OF is set iff operand is MIN_INT of current width */
-  rtl_li(&t3, id_dest->width == 1 ? 0x80 : (id_dest->width == 2 ? 0x8000 : 0x80000000));
-  rtl_setrelop(RELOP_EQ, &t1, &id_dest->val, &t3);
+  if (id_dest->width == 1) {
+    rtl_eqi(&t1, &id_dest->val, 0x80);
+  }
+  else if (id_dest->width == 2) {
+    rtl_eqi(&t1, &id_dest->val, 0x8000);
+  }
+  else {
+    rtl_eqi(&t1, &id_dest->val, 0x80000000);
+  }
   rtl_set_OF(&t1);
 
   print_asm_template1(neg);
