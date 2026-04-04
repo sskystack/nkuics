@@ -4,9 +4,6 @@
 static _RegSet* (*H)(_Event, _RegSet*) = NULL;
 
 void vecsys();
-void vectrap();
-void vecirq_time();
-void vecirq_iodev();
 void vecnull();
 
 _RegSet* irq_handle(_RegSet *tf) {
@@ -15,9 +12,6 @@ _RegSet* irq_handle(_RegSet *tf) {
     _Event ev;
     switch (tf->irq) {
       case 0x80: ev.event = _EVENT_SYSCALL; break;
-      case 0x03: ev.event = _EVENT_TRAP; break;
-      case 0x81: ev.event = _EVENT_IRQ_TIME; break;
-      case 0x82: ev.event = _EVENT_IRQ_IODEV; break;
       default: ev.event = _EVENT_ERROR; break;
     }
 
@@ -40,9 +34,6 @@ void _asye_init(_RegSet*(*h)(_Event, _RegSet*)) {
 
   // -------------------- system call --------------------------
   idt[0x80] = GATE(STS_TG32, KSEL(SEG_KCODE), vecsys, DPL_USER);
-  idt[0x03] = GATE(STS_TG32, KSEL(SEG_KCODE), vectrap, DPL_USER);
-  idt[0x81] = GATE(STS_IG32, KSEL(SEG_KCODE), vecirq_time, DPL_KERN);
-  idt[0x82] = GATE(STS_IG32, KSEL(SEG_KCODE), vecirq_iodev, DPL_KERN);
 
   set_idt(idt, sizeof(idt));
 
@@ -51,24 +42,12 @@ void _asye_init(_RegSet*(*h)(_Event, _RegSet*)) {
 }
 
 _RegSet *_make(_Area stack, void *entry, void *arg) {
-  (void)stack;
-  (void)entry;
-  (void)arg;
   return NULL;
 }
 
 void _trap() {
-  asm volatile("int3");
 }
 
 int _istatus(int enable) {
-  uint32_t eflags;
-  asm volatile("pushfl; popl %0" : "=r"(eflags));
-  int old = (eflags & FL_IF) != 0;
-  if (enable) {
-    asm volatile("sti");
-  } else {
-    asm volatile("cli");
-  }
-  return old;
+  return 0;
 }
