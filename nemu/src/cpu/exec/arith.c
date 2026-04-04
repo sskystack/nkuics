@@ -115,7 +115,23 @@ make_EHelper(dec) {
 }
 
 make_EHelper(neg) {
-  TODO();
+  rtl_li(&t0, 0);
+  rtl_sub(&t2, &t0, &id_dest->val);
+  if (id_dest->width != 4) {
+    rtl_andi(&t2, &t2, id_dest->width == 1 ? 0xff : 0xffff);
+  }
+  operand_write(id_dest, &t2);
+
+  rtl_update_ZFSF(&t2, id_dest->width);
+
+  /* CF is set iff original operand is non-zero */
+  rtl_setrelop(RELOP_NE, &t1, &id_dest->val, &t0);
+  rtl_set_CF(&t1);
+
+  /* OF is set iff operand is MIN_INT of current width */
+  rtl_li(&t3, id_dest->width == 1 ? 0x80 : (id_dest->width == 2 ? 0x8000 : 0x80000000));
+  rtl_setrelop(RELOP_EQ, &t1, &id_dest->val, &t3);
+  rtl_set_OF(&t1);
 
   print_asm_template1(neg);
 }
