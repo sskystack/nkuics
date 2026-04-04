@@ -16,14 +16,15 @@ _RegSet* do_syscall(_RegSet *r) {
       int fd = a[1];
       char *buf = (char *)a[2];
       size_t len = a[3];
-      if (fd == 1 || fd == 2) {
+      if (fd >= 0) {
         for (size_t i = 0; i < len; i++) {
           _putc(buf[i]);
         }
         r->eax = len;
         break;
       }
-      panic("Unsupported fd = %d", fd);
+      r->eax = -1;
+      break;
     }
     case SYS_exit:
       _halt((int)a[1]);
