@@ -25,7 +25,7 @@ _RegSet* do_syscall(_RegSet *r) {
         r->eax = len;
         break;
       }
-      r->eax = -1;
+      r->eax = len;
       break;
     }
     case SYS_exit:
