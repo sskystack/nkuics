@@ -26,11 +26,15 @@ int main() {
 #ifdef HAS_ASYE
   Log("Initializing interrupt/exception handler...");
   init_irq();
+  Log("Interrupt/exception handler initialized");
 #endif
 
   init_fs();
+  Log("File system initialized");
 
+  Log("Loading user program: /bin/bmptest");
   uint32_t entry = loader(NULL, "/bin/bmptest");
+  Log("Jumping to entry = 0x%x", entry);
   ((void (*)(void))entry)();
 
   panic("Should not reach here");
