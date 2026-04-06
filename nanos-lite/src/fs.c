@@ -25,8 +25,9 @@ static Finfo file_table[] __attribute__((used)) = {
 void ramdisk_read(void *buf, off_t offset, size_t len);
 void ramdisk_write(const void *buf, off_t offset, size_t len);
 size_t events_read(void *buf, size_t len);
-void dispinfo_read(void *buf, off_t offset, size_t len);
-void fb_write(const void *buf, off_t offset, size_t len);
+size_t dispinfo_read(void *buf, off_t offset, size_t len);
+size_t fb_write(const void *buf, off_t offset, size_t len);
+size_t dispinfo_size(void);
 
 int fs_open(const char *pathname, int flags, int mode) {
   (void)flags;
@@ -54,7 +55,7 @@ size_t fs_read(int fd, void *buf, size_t len) {
   }
 
   if (fd == FD_DISPINFO) {
-    dispinfo_read(buf, f->open_offset, len);
+    len = dispinfo_read(buf, f->open_offset, len);
   }
   else {
     ramdisk_read(buf, f->disk_offset + f->open_offset, len);
@@ -76,7 +77,11 @@ size_t fs_write(int fd, const void *buf, size_t len) {
 
   Finfo *f = &file_table[fd];
   if (fd == FD_FB) {
-    fb_write(buf, f->open_offset, len);
+    if (f->open_offset >= (off_t)f->size) return 0;
+    if (f->open_offset + len > f->size) {
+      len = f->size - f->open_offset;
+    }
+    len = fb_write(buf, f->open_offset, len);
     f->open_offset += len;
     return len;
   }
@@ -119,4 +124,5 @@ size_t fs_filesz(int fd) {
 
 void init_fs() {
   file_table[FD_FB].size = _screen.width * _screen.height * sizeof(uint32_t);
+  file_table[FD_DISPINFO].size = dispinfo_size();
 }

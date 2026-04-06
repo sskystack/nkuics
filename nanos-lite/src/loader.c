@@ -7,7 +7,7 @@ uintptr_t loader(_Protect *as, const char *filename) {
   (void)as;
 
   if (filename == NULL) {
-    filename = "/bin/text";
+    filename = "/bin/bmptest";
   }
 
   int fd = fs_open(filename, 0, 0);
