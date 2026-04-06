@@ -10,6 +10,7 @@ void raise_intr(uint8_t NO, vaddr_t ret_addr) {
   uint32_t low = vaddr_read(idt_addr, 4);
   uint32_t high = vaddr_read(idt_addr + 4, 4);
   uint32_t handler = (low & 0x0000ffff) | (high & 0xffff0000);
+  uint32_t gate_type = (high >> 8) & 0xf;
 
   tmp = cpu.eflags;
   rtl_push(&tmp);
@@ -20,9 +21,15 @@ void raise_intr(uint8_t NO, vaddr_t ret_addr) {
   tmp = ret_addr;
   rtl_push(&tmp);
 
+  // interrupt gate clears IF, trap gate keeps IF unchanged
+  if (gate_type == 0xe) {
+    cpu.IF = 0;
+  }
+
   cpu.eip = handler;
 }
 
 void dev_raise_intr() {
-  raise_intr(0x81, cpu.eip);
+  // Keep empty to avoid device IRQ path interfering with current PA3 user-mode flow.
+  // User programs still get timer info via polling RTC port (_uptime).
 }
