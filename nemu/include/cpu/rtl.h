@@ -123,6 +123,7 @@ make_rtl_setget_eflags(CF)
 make_rtl_setget_eflags(OF)
 make_rtl_setget_eflags(ZF)
 make_rtl_setget_eflags(SF)
+make_rtl_setget_eflags(PF)
 
 static inline void rtl_mv(rtlreg_t* dest, const rtlreg_t *src1) {
   // dest <- src1
@@ -189,9 +190,19 @@ static inline void rtl_update_SF(const rtlreg_t* result, int width) {
   cpu.SF = (((*result) >> (width * 8 - 1)) & 0x1);
 }
 
+static inline void rtl_update_PF(const rtlreg_t* result) {
+  // eflags.PF <- parity of low 8 bits (1 means even parity)
+  uint8_t x = (uint8_t)(*result & 0xff);
+  x ^= x >> 4;
+  x ^= x >> 2;
+  x ^= x >> 1;
+  cpu.PF = (x & 0x1) ^ 0x1;
+}
+
 static inline void rtl_update_ZFSF(const rtlreg_t* result, int width) {
   rtl_update_ZF(result, width);
   rtl_update_SF(result, width);
+  rtl_update_PF(result);
 }
 
 #endif
