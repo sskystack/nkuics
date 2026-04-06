@@ -86,10 +86,14 @@ make_EHelper(cltd) {
 
 make_EHelper(cwtl) {
   if (decoding.is_operand_size_16) {
-    TODO();
+    // cbtw: sign-extend AL to AX
+    rtl_sext(&t0, &cpu.eax, 1);
+    reg_w(R_AX) = t0;
   }
   else {
-    TODO();
+    // cwtl(cwde): sign-extend AX to EAX
+    rtl_sext(&t0, &cpu.eax, 2);
+    cpu.eax = t0;
   }
 
   print_asm(decoding.is_operand_size_16 ? "cbtw" : "cwtl");
