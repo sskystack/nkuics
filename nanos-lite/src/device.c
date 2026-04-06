@@ -26,11 +26,17 @@ size_t events_read(void *buf, size_t len) {
 
 static char dispinfo[128] __attribute__((used));
 
-void dispinfo_read(void *buf, off_t offset, size_t len) {
+size_t dispinfo_read(void *buf, off_t offset, size_t len) {
+  size_t info_len = strlen(dispinfo);
+  if (offset >= (off_t)info_len) return 0;
+  if (offset + len > info_len) {
+    len = info_len - offset;
+  }
   memcpy(buf, dispinfo + offset, len);
+  return len;
 }
 
-void fb_write(const void *buf, off_t offset, size_t len) {
+size_t fb_write(const void *buf, off_t offset, size_t len) {
   const uint32_t *pixels = (const uint32_t *)buf;
   int width = _screen.width;
   int pixel_off = offset / sizeof(uint32_t);
@@ -48,6 +54,11 @@ void fb_write(const void *buf, off_t offset, size_t len) {
     y++;
   }
   _draw_sync();
+  return len;
+}
+
+size_t dispinfo_size(void) {
+  return strlen(dispinfo);
 }
 
 void init_device() {
