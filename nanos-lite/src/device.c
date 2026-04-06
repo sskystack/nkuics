@@ -15,6 +15,7 @@ size_t events_read(void *buf, size_t len) {
 
   int key = _read_key();
   char event[64];
+  static int key_log_cnt = 0;
 
   if (key != _KEY_NONE) {
     bool is_keydown = (key & KEYDOWN_MASK) != 0;
@@ -22,6 +23,10 @@ size_t events_read(void *buf, size_t len) {
     const char *name = (key >= 0 && key < (int)(sizeof(keyname) / sizeof(keyname[0])) && keyname[key] != NULL)
       ? keyname[key]
       : "UNKNOWN";
+    if (key_log_cnt < 20) {
+      Log("events_read: %s %s (%d)", is_keydown ? "kd" : "ku", name, key);
+      key_log_cnt++;
+    }
     snprintf(event, sizeof(event), "%s %s\n", is_keydown ? "kd" : "ku", name);
   } else {
     snprintf(event, sizeof(event), "t %lu\n", _uptime());
@@ -47,11 +52,6 @@ size_t dispinfo_read(void *buf, off_t offset, size_t len) {
 
 size_t fb_write(const void *buf, off_t offset, size_t len) {
   const uint32_t *pixels = (const uint32_t *)buf;
-  static int fb_pixel_log_cnt = 0;
-  if (fb_pixel_log_cnt < 3 && len >= sizeof(uint32_t)) {
-    Log("fb_write: offset=%d len=%d first_pixel=%x", offset, len, pixels[0]);
-    fb_pixel_log_cnt++;
-  }
   int width = _screen.width;
   int pixel_off = offset / sizeof(uint32_t);
   int x = pixel_off % width;
