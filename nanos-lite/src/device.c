@@ -38,6 +38,11 @@ size_t dispinfo_read(void *buf, off_t offset, size_t len) {
 
 size_t fb_write(const void *buf, off_t offset, size_t len) {
   const uint32_t *pixels = (const uint32_t *)buf;
+  static int fb_pixel_log_cnt = 0;
+  if (fb_pixel_log_cnt < 3 && len >= sizeof(uint32_t)) {
+    Log("fb_write: offset=%d len=%d first_pixel=0x%08x", offset, len, pixels[0]);
+    fb_pixel_log_cnt++;
+  }
   int width = _screen.width;
   int pixel_off = offset / sizeof(uint32_t);
   int x = pixel_off % width;
