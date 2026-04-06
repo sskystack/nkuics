@@ -13,7 +13,6 @@ static uint64_t jiffy = 0;
 static struct itimerval it;
 static int device_update_flag = false;
 static int update_screen_flag = false;
-static uint64_t force_screen_sync = 0;
 
 void init_serial();
 void init_timer();
@@ -39,19 +38,14 @@ static void timer_sig_handler(int signum) {
 }
 
 void device_update() {
-  if (device_update_flag) {
-    device_update_flag = false;
-
-    if (update_screen_flag) {
-      update_screen();
-      update_screen_flag = false;
-    }
+  if (!device_update_flag) {
+    return;
   }
+  device_update_flag = false;
 
-  // Fallback: some environments may not deliver SIGVTALRM reliably.
-  // Force a periodic refresh to avoid a permanent black window.
-  if ((++force_screen_sync % 20000) == 0) {
+  if (update_screen_flag) {
     update_screen();
+    update_screen_flag = false;
   }
 
   SDL_Event event;
