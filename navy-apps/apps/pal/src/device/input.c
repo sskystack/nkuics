@@ -319,7 +319,10 @@ PAL_ProcessEvent(
 #ifdef PAL_HAS_NATIVEMIDI
    MIDI_CheckLoop();
 #endif
-   while (PAL_PollEvent(NULL));
+   // The NDL-backed PAL_PollEvent() may wait for the next input/timer event.
+   // Draining events in a loop can therefore block the whole splash/game loop
+   // after handling one key event. Process at most one event per call instead.
+   PAL_PollEvent(NULL);
 }
 
 
