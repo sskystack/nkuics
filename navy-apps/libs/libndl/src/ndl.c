@@ -90,20 +90,12 @@ static const char *keys[] = {
 
 int NDL_WaitEvent(NDL_Event *event) {
   char buf[256];
-  int ch;
 
   while (1) {
-    char *p = buf;
-    while ((ch = getc(evtdev)) != -1) {
-      *p ++ = ch;
-      assert(p - buf < sizeof(buf));
-      if (ch == '\n') break;
-    }
-
-    if (p == buf) {
+    if (fgets(buf, sizeof(buf), evtdev) == NULL) {
+      clearerr(evtdev);
       continue;
     }
-    *p = '\0';
 
     if (buf[0] == 'k') {
       char keyname[32];
