@@ -11,16 +11,25 @@ static const char *keyname[256] __attribute__((used)) = {
 #define KEYDOWN_MASK 0x8000
 
 size_t events_read(void *buf, size_t len) {
+  if (len == 0) return 0;
+
   int key = _read_key();
-  if (key == _KEY_NONE) {
-    return 0;
+  char event[64];
+
+  if (key != _KEY_NONE) {
+    bool is_keydown = (key & KEYDOWN_MASK) != 0;
+    key &= ~KEYDOWN_MASK;
+    const char *name = (key >= 0 && key < (int)(sizeof(keyname) / sizeof(keyname[0])) && keyname[key] != NULL)
+      ? keyname[key]
+      : "UNKNOWN";
+    snprintf(event, sizeof(event), "%s %s\n", is_keydown ? "kd" : "ku", name);
+  } else {
+    snprintf(event, sizeof(event), "t %lu\n", _uptime());
   }
 
-  bool is_keydown = (key & KEYDOWN_MASK) != 0;
-  key &= ~KEYDOWN_MASK;
-
-  int n = snprintf((char *)buf, len, "%s %s\n", is_keydown ? "kd" : "ku", keyname[key]);
-  if (n < 0) return 0;
+  size_t n = strlen(event);
+  if (n > len) n = len;
+  memcpy(buf, event, n);
   return n;
 }
 
