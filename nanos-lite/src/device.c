@@ -15,6 +15,7 @@ size_t events_read(void *buf, size_t len) {
 
   int key = _read_key();
   char event[64];
+  static int event_log_cnt = 0;
 
   if (key != _KEY_NONE) {
     bool is_keydown = (key & KEYDOWN_MASK) != 0;
@@ -29,6 +30,10 @@ size_t events_read(void *buf, size_t len) {
 
   size_t n = strlen(event);
   if (n > len) n = len;
+  if (event_log_cnt < 20 || (event_log_cnt < 200 && (event_log_cnt % 20 == 0))) {
+    Log("events_read: %s", event);
+  }
+  event_log_cnt++;
   memcpy(buf, event, n);
   return n;
 }

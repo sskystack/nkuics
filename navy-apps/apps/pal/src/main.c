@@ -264,6 +264,7 @@ PAL_SplashScreen(
    LPBITMAPRLE    lpBitmapTitle;
    LPBYTE         buf, buf2;
    int            cranepos[9][3], i, iImgPos = 200, iCraneFrame = 0, iTitleHeight;
+   int            frameCount = 0;
    DWORD          dwTime, dwBeginTime;
    BOOL           fUseCD = TRUE;
 
@@ -353,6 +354,13 @@ PAL_SplashScreen(
    {
       PAL_ProcessEvent();
       dwTime = SDL_GetTicks() - dwBeginTime;
+      if (frameCount < 10 || frameCount % 50 == 0 ||
+          (g_InputState.dwKeyPress & (kKeyMenu | kKeySearch)))
+      {
+         fprintf(stderr,
+            "[PAL] splash frame=%d dwTime=%u imgPos=%d crane=%d key=0x%x\n",
+            frameCount, dwTime, iImgPos, iCraneFrame, g_InputState.dwKeyPress);
+      }
 
       //
       // Set the palette
@@ -493,6 +501,7 @@ PAL_SplashScreen(
          SDL_Delay(1);
          PAL_ProcessEvent();
       }
+      frameCount++;
    }
 
    SDL_FreeSurface(lpBitmapDown);
