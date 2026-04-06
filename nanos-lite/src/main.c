@@ -33,7 +33,7 @@ int main() {
   Log("File system initialized");
 
   Log("Loading user program: /bin/events");
-  uint32_t entry = loader(NULL, "/bin/text");
+  uint32_t entry = loader(NULL, "/bin/bmptest");
   Log("Jumping to entry = 0x%x", entry);
   ((void (*)(void))entry)();
 
