@@ -12,7 +12,7 @@ static void get_display_info();
 static int canvas_w, canvas_h, screen_w, screen_h, pad_x, pad_y;
 
 int NDL_OpenDisplay(int w, int h) {
-  if (!canvas) {
+  if (canvas) {
     NDL_CloseDisplay();
   }
 
@@ -89,14 +89,20 @@ static const char *keys[] = {
 #define numkeys ( sizeof(keys) / sizeof(keys[0]) )
 
 int NDL_WaitEvent(NDL_Event *event) {
-  char buf[256], *p = buf, ch;
+  char buf[256], ch;
 
   while (1) {
+    char *p = buf;
     while ((ch = getc(evtdev)) != -1) {
       *p ++ = ch;
       assert(p - buf < sizeof(buf));
       if (ch == '\n') break;
     }
+
+    if (p == buf) {
+      continue;
+    }
+    *p = '\0';
 
     if (buf[0] == 'k') {
       char keyname[32];
