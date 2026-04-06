@@ -34,6 +34,9 @@ int fs_open(const char *pathname, int flags, int mode) {
   (void)mode;
   for (int i = 0; i < NR_FILES; i++) {
     if (strcmp(file_table[i].name, pathname) == 0) {
+      if (i == FD_FB || i == FD_DISPINFO) {
+        Log("fs_open: %s (fd=%d, size=%d)", pathname, i, file_table[i].size);
+      }
       file_table[i].open_offset = 0;
       return i;
     }
@@ -77,9 +80,14 @@ size_t fs_write(int fd, const void *buf, size_t len) {
 
   Finfo *f = &file_table[fd];
   if (fd == FD_FB) {
+    static int fb_log_cnt = 0;
     if (f->open_offset >= (off_t)f->size) return 0;
     if (f->open_offset + len > f->size) {
       len = f->size - f->open_offset;
+    }
+    if (fb_log_cnt < 5) {
+      Log("fs_write: /dev/fb offset=%d len=%d", f->open_offset, len);
+      fb_log_cnt++;
     }
     len = fb_write(buf, f->open_offset, len);
     f->open_offset += len;
