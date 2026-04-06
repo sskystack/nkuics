@@ -89,14 +89,36 @@ static const char *keys[] = {
 #define numkeys ( sizeof(keys) / sizeof(keys[0]) )
 
 int NDL_WaitEvent(NDL_Event *event) {
-  char buf[256], *p = buf, ch;
+  char buf[256], ch;
+  static int event_log_cnt = 0;
 
   while (1) {
+    char *p = buf;
+    memset(buf, 0, sizeof(buf));
     while ((ch = getc(evtdev)) != -1) {
       *p ++ = ch;
       assert(p - buf < sizeof(buf));
-      if (ch == '\n') break;
+      if (ch == '\n') {
+        *p = '\0';
+        break;
+      }
     }
+
+    if (p == buf) {
+      continue;
+    }
+
+    if (p == buf + sizeof(buf)) {
+      buf[sizeof(buf) - 1] = '\0';
+    }
+
+    if (event_log_cnt < 20 || buf[0] == 'k') {
+      fprintf(stderr, "[NDL] raw event: %s", buf);
+      if (buf[strlen(buf) - 1] != '\n') {
+        fputc('\n', stderr);
+      }
+    }
+    event_log_cnt++;
 
     if (buf[0] == 'k') {
       char keyname[32];

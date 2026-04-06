@@ -1,4 +1,5 @@
 #include "hal.h"
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ndl.h>
@@ -10,6 +11,8 @@
 
 static uint32_t systime;
 static int key_state[128];
+static int timer_log_cnt;
+static int key_log_cnt;
 
 void PAL_KeyPressHandler(int);
 void PAL_KeyReleaseHandler(int);
@@ -38,10 +41,18 @@ PAL_PollEvent(
   
   if (evt.type == NDL_EVENT_TIMER) {
     systime = evt.data;
+    if (timer_log_cnt < 20 || (timer_log_cnt < 200 && timer_log_cnt % 20 == 0)) {
+      fprintf(stderr, "[PAL] timer event: systime=%u\n", systime);
+    }
+    timer_log_cnt++;
   }
 
   if (evt.type == NDL_EVENT_KEYUP || evt.type == NDL_EVENT_KEYDOWN) {
     int key = -1, kd = evt.type == NDL_EVENT_KEYDOWN;
+    if (key_log_cnt < 20) {
+      fprintf(stderr, "[PAL] key event: type=%s raw=%d\n", kd ? "down" : "up", evt.data);
+    }
+    key_log_cnt++;
     switch (evt.data) {
       case NDL_SCANCODE_UP: key = K_UP; break;
       case NDL_SCANCODE_DOWN: key = K_DOWN; break;
