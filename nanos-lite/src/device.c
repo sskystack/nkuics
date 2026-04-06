@@ -25,7 +25,9 @@ size_t events_read(void *buf, size_t len) {
       : "UNKNOWN";
     snprintf(event, sizeof(event), "%s %s\n", is_keydown ? "kd" : "ku", name);
   } else {
-    snprintf(event, sizeof(event), "t %lu\n", _uptime());
+    // Klib printf in PA3 does not handle "%lu" reliably. Emit timer with "%u"
+    // so libndl can parse the uptime value correctly.
+    snprintf(event, sizeof(event), "t %u\n", (unsigned)_uptime());
   }
 
   size_t n = strlen(event);
