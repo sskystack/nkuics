@@ -30,6 +30,8 @@ void raise_intr(uint8_t NO, vaddr_t ret_addr) {
 }
 
 void dev_raise_intr() {
-  // Keep empty to avoid device IRQ path interfering with current PA3 user-mode flow.
-  // User programs still get timer info via polling RTC port (_uptime).
+  if (cpu.IF == 0) {
+    return;
+  }
+  raise_intr(0x81, cpu.eip);
 }
