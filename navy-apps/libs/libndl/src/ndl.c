@@ -108,7 +108,9 @@ int NDL_WaitEvent(NDL_Event *event) {
           break;
         }
       }
-      assert(event->data >= 1 && event->data < numkeys);
+      if (event->data < 1 || event->data >= numkeys) {
+        continue;
+      }
       return 0;
     }
     if (buf[0] == 't') {
