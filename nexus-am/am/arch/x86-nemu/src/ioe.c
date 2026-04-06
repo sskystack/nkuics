@@ -41,9 +41,11 @@ void _draw_sync() {
 }
 
 int _read_key() {
-  uint8_t status = inb(0x64);
+  uint8_t status = inb(0x64);  // i8042 status port: 8-bit
   if (status & 0x1) {
-    return (int)inl(0x60);
+    // In NEMU, port 0x60 stores a 32-bit AM keycode (may include KEYDOWN_MASK)
+    uint32_t key = inl(0x60);
+    return (int)key;
   }
   return _KEY_NONE;
 }
