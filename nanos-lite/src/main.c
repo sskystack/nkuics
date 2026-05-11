@@ -32,7 +32,7 @@ int main() {
   init_fs();
   Log("File system initialized");
 
-  Log("Loading user program: /bin/events");
+  Log("Loading user program: /bin/dummy");
   uint32_t entry = loader(NULL, "/bin/dummy");
   Log("Jumping to entry = 0x%x", entry);
   ((void (*)(void))entry)();
