@@ -10,6 +10,8 @@ static const char *keyname[256] __attribute__((used)) = {
 
 #define KEYDOWN_MASK 0x8000
 
+extern void switch_current_game(void);
+
 size_t events_read(void *buf, size_t len) {
   if (len == 0) return 0;
 
@@ -20,6 +22,9 @@ size_t events_read(void *buf, size_t len) {
   if (key != _KEY_NONE) {
     bool is_keydown = (key & KEYDOWN_MASK) != 0;
     key &= ~KEYDOWN_MASK;
+    if (is_keydown && key == _KEY_F12) {
+      switch_current_game();
+    }
     const char *name = (key >= 0 && key < (int)(sizeof(keyname) / sizeof(keyname[0])) && keyname[key] != NULL)
       ? keyname[key]
       : "UNKNOWN";
