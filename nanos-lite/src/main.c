@@ -33,7 +33,7 @@ int main() {
   Log("File system initialized");
 
   Log("Loading user program: /bin/dummy");
-  load_prog("/bin/dummy");
+  load_prog("/bin/pal");
 
   panic("Should not reach here");
 }
