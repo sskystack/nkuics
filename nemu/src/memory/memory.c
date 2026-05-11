@@ -44,7 +44,8 @@ static inline paddr_t page_translate(vaddr_t addr, bool is_write) {
   paddr_t pde_addr = pdir_base + PDX(addr) * sizeof(PDE);
   PDE pde;
   pde.val = paddr_read(pde_addr, sizeof(PDE));
-  assert(pde.present);
+  Assert(pde.present, "invalid PDE: vaddr=0x%08x cr3=0x%08x pde_idx=%u pde_addr=0x%08x pde=0x%08x",
+      addr, cpu.cr3.val, PDX(addr), pde_addr, pde.val);
 
   if (!pde.accessed) {
     pde.accessed = 1;
@@ -55,7 +56,8 @@ static inline paddr_t page_translate(vaddr_t addr, bool is_write) {
   paddr_t pte_addr = ptab_base + PTX(addr) * sizeof(PTE);
   PTE pte;
   pte.val = paddr_read(pte_addr, sizeof(PTE));
-  assert(pte.present);
+  Assert(pte.present, "invalid PTE: vaddr=0x%08x cr3=0x%08x pde_idx=%u pte_idx=%u pte_addr=0x%08x pte=0x%08x",
+      addr, cpu.cr3.val, PDX(addr), PTX(addr), pte_addr, pte.val);
 
   pte.accessed = 1;
   if (is_write) {
