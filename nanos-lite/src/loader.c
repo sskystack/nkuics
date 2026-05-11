@@ -33,7 +33,8 @@ uintptr_t loader(_Protect *as, const char *filename) {
 
     if (current != NULL) {
       uintptr_t brk = (uintptr_t)DEFAULT_ENTRY + img_size;
-      current->cur_brk = current->max_brk = brk;
+      current->cur_brk = brk;
+      current->max_brk = PGROUNDUP(brk);
     }
   }
 

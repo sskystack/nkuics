@@ -19,7 +19,8 @@ int mm_brk(uint32_t new_brk) {
   assert(current != NULL);
 
   if (current->cur_brk == 0) {
-    current->cur_brk = current->max_brk = new_brk;
+    current->cur_brk = new_brk;
+    current->max_brk = PGROUNDUP(new_brk);
   }
   else {
     if (new_brk > current->max_brk) {
@@ -32,7 +33,7 @@ int mm_brk(uint32_t new_brk) {
         _map(&current->as, (void *)va, pa);
       }
 
-      current->max_brk = new_brk;
+      current->max_brk = map_end;
     }
 
     current->cur_brk = new_brk;
