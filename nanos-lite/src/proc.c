@@ -15,15 +15,15 @@ void load_prog(const char *filename) {
 
   uintptr_t entry = loader(&pcb[i].as, filename);
 
-  // TODO: remove the following three lines after you have implemented _umake()
-  // _switch(&pcb[i].as);
-  // ((void (*)(void))entry)();
+  _Area ustack;
+  ustack.end = (void *)0x0bfe0010;
+  ustack.start = (void *)((uintptr_t)ustack.end - STACK_SIZE);
 
-  _Area stack;
-  stack.start = pcb[i].stack;
-  stack.end = stack.start + sizeof(pcb[i].stack);
+  _Area kstack;
+  kstack.start = pcb[i].stack;
+  kstack.end = kstack.start + sizeof(pcb[i].stack);
 
-  pcb[i].tf = _umake(&pcb[i].as, stack, stack, (void *)entry, NULL, NULL);
+  pcb[i].tf = _umake(&pcb[i].as, ustack, kstack, (void *)entry, NULL, NULL);
 }
 
 _RegSet* schedule(_RegSet *prev) {
