@@ -27,5 +27,16 @@ void load_prog(const char *filename) {
 }
 
 _RegSet* schedule(_RegSet *prev) {
-  return NULL;
+  if (current != NULL) {
+    uintptr_t stack_start = (uintptr_t)current->stack;
+    uintptr_t stack_end = stack_start + sizeof(current->stack);
+    uintptr_t prev_addr = (uintptr_t)prev;
+    if (prev_addr >= stack_start && prev_addr < stack_end) {
+      current->tf = prev;
+    }
+  }
+
+  current = &pcb[0];
+  _switch(&current->as);
+  return current->tf;
 }
