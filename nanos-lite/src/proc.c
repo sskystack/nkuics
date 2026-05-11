@@ -16,8 +16,8 @@ void load_prog(const char *filename) {
   uintptr_t entry = loader(&pcb[i].as, filename);
 
   _Area ustack;
-  ustack.end = (void *)0x0bfe0010;
-  ustack.start = (void *)((uintptr_t)ustack.end - STACK_SIZE);
+  ustack.end = (void *)0x0c000000;
+  ustack.start = (void *)0x0b800000;
 
   _Area kstack;
   kstack.start = pcb[i].stack;
@@ -28,12 +28,7 @@ void load_prog(const char *filename) {
 
 _RegSet* schedule(_RegSet *prev) {
   if (current != NULL) {
-    uintptr_t stack_start = (uintptr_t)current->stack;
-    uintptr_t stack_end = stack_start + sizeof(current->stack);
-    uintptr_t prev_addr = (uintptr_t)prev;
-    if (prev_addr >= stack_start && prev_addr < stack_end) {
-      current->tf = prev;
-    }
+    current->tf = prev;
   }
 
   current = &pcb[0];
