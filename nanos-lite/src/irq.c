@@ -6,6 +6,9 @@ static _RegSet* do_event(_Event e, _RegSet* r) {
   switch (e.event) {
     case _EVENT_IRQ_TIME: return r;
     case _EVENT_SYSCALL: return do_syscall(r);
+    case _EVENT_TRAP:
+      printf("kernel trap\n");
+      return r;
     default: panic("Unhandled event ID = %d", e.event);
   }
 
