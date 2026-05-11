@@ -12,6 +12,12 @@ static const char *keyname[256] __attribute__((used)) = {
 
 size_t events_read(void *buf, size_t len) {
   if (len == 0) return 0;
+  static int events_enter_log_cnt = 0;
+  if (events_enter_log_cnt < 80) {
+    Log("%s:%d events_read enter: buf=%p len=%d",
+        __FILE__, __LINE__, buf, len);
+  }
+  events_enter_log_cnt++;
 
   int key = _read_key();
   char event[64];
@@ -43,6 +49,8 @@ size_t events_read(void *buf, size_t len) {
 static char dispinfo[128] __attribute__((used));
 
 size_t dispinfo_read(void *buf, off_t offset, size_t len) {
+  Log("%s:%d dispinfo_read enter: buf=%p offset=%d len=%d",
+      __FILE__, __LINE__, buf, offset, len);
   size_t info_len = strlen(dispinfo);
   if (offset >= (off_t)info_len) return 0;
   if (offset + len > info_len) {
@@ -55,8 +63,15 @@ size_t dispinfo_read(void *buf, off_t offset, size_t len) {
 size_t fb_write(const void *buf, off_t offset, size_t len) {
   const uint32_t *pixels = (const uint32_t *)buf;
   static int fb_pixel_log_cnt = 0;
+  static int fb_enter_log_cnt = 0;
+  if (fb_enter_log_cnt < 200) {
+    Log("%s:%d fb_write enter: buf=%p offset=%d len=%d",
+        __FILE__, __LINE__, buf, offset, len);
+  }
+  fb_enter_log_cnt++;
   if (fb_pixel_log_cnt < 3 && len >= sizeof(uint32_t)) {
-    Log("fb_write: offset=%d len=%d first_pixel=%x", offset, len, pixels[0]);
+    Log("%s:%d fb_write first-pixel-read: buf=%p first_pixel=%x",
+        __FILE__, __LINE__, buf, pixels[0]);
     fb_pixel_log_cnt++;
   }
   int width = _screen.width;
@@ -68,6 +83,10 @@ size_t fb_write(const void *buf, off_t offset, size_t len) {
   while (n > 0) {
     int w = width - x;
     if (w > n) w = n;
+    if (fb_enter_log_cnt <= 200) {
+      Log("%s:%d fb_write draw-row: pixels=%p x=%d y=%d w=%d",
+          __FILE__, __LINE__, pixels, x, y, w);
+    }
     _draw_rect(pixels, x, y, w, 1);
     pixels += w;
     n -= w;

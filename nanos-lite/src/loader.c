@@ -11,6 +11,8 @@ uintptr_t loader(_Protect *as, const char *filename) {
 
   int fd = fs_open(filename, 0, 0);
   size_t img_size = fs_filesz(fd);
+  Log("%s:%d loader: filename=%s entry=%p img_size=%d as=%p",
+      __FILE__, __LINE__, filename, DEFAULT_ENTRY, img_size, as);
 
   if (as == NULL) {
     size_t nread = fs_read(fd, DEFAULT_ENTRY, img_size);
@@ -35,6 +37,9 @@ uintptr_t loader(_Protect *as, const char *filename) {
       uintptr_t brk = (uintptr_t)DEFAULT_ENTRY + img_size;
       current->cur_brk = brk;
       current->max_brk = PGROUNDUP(brk);
+      Log("%s:%d loader: brk=%p max_brk=%p",
+          __FILE__, __LINE__, (void *)current->cur_brk,
+          (void *)current->max_brk);
     }
   }
 

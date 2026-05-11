@@ -48,6 +48,13 @@ int fs_open(const char *pathname, int flags, int mode) {
 size_t fs_read(int fd, void *buf, size_t len) {
   assert(fd >= 0 && fd < NR_FILES);
 
+  static int fs_read_log_cnt = 0;
+  if (fs_read_log_cnt < 80 || fd == FD_EVENTS || fd == FD_DISPINFO) {
+    Log("%s:%d fs_read enter: fd=%d buf=%p len=%d open_offset=%d",
+        __FILE__, __LINE__, fd, buf, len, file_table[fd].open_offset);
+  }
+  fs_read_log_cnt++;
+
   if (fd == FD_STDIN) return 0;
   if (fd == FD_EVENTS) return events_read(buf, len);
 
@@ -69,6 +76,13 @@ size_t fs_read(int fd, void *buf, size_t len) {
 
 size_t fs_write(int fd, const void *buf, size_t len) {
   assert(fd >= 0 && fd < NR_FILES);
+
+  static int fs_write_log_cnt = 0;
+  if (fs_write_log_cnt < 80 || fd == FD_FB) {
+    Log("%s:%d fs_write enter: fd=%d buf=%p len=%d open_offset=%d",
+        __FILE__, __LINE__, fd, buf, len, file_table[fd].open_offset);
+  }
+  fs_write_log_cnt++;
 
   if (fd == FD_STDOUT || fd == FD_STDERR) {
     const char *p = (const char *)buf;
