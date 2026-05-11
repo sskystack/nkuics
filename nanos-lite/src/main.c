@@ -32,6 +32,9 @@ int main() {
   init_fs();
   Log("File system initialized");
 
+  Log("Loading user program: /bin/pal");
+  load_prog("/bin/pal");
+
   _trap();
 
   panic("Should not reach here");
