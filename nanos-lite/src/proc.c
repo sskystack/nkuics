@@ -16,23 +16,34 @@ void load_prog(const char *filename) {
   uintptr_t entry = loader(&pcb[i].as, filename);
 
   _Area ustack;
-  ustack.end = (void *)0x0c000000;
-  ustack.start = (void *)0x0b800000;
+  ustack.start = pcb[i].stack;
+  ustack.end = pcb[i].stack + sizeof(pcb[i].stack);
 
-  _Area kstack;
-  kstack.start = pcb[i].stack;
-  kstack.end = kstack.start + sizeof(pcb[i].stack);
+  _Area kstack = ustack;
 
   pcb[i].tf = _umake(&pcb[i].as, ustack, kstack, (void *)entry, NULL, NULL);
+  Log("%s:%d load_prog: pcb=%d entry=%p ustack=[%p,%p) tf=%p tf.eip=%p iret_esp=%p",
+      __FILE__, __LINE__, i, (void *)entry, ustack.start, ustack.end,
+      pcb[i].tf, (void *)pcb[i].tf->eip,
+      (void *)((uintptr_t)pcb[i].tf + sizeof(_RegSet)));
   current = NULL;
 }
 
 _RegSet* schedule(_RegSet *prev) {
   if (current != NULL) {
+    Log("%s:%d schedule: save current=%p prev=%p prev.eip=%p prev.esp=%p",
+        __FILE__, __LINE__, current, prev, (void *)prev->eip, (void *)prev->esp);
     current->tf = prev;
+  }
+  else {
+    Log("%s:%d schedule: first switch, keep boot trap frame prev=%p prev.eip=%p prev.esp=%p",
+        __FILE__, __LINE__, prev, (void *)prev->eip, (void *)prev->esp);
   }
 
   current = &pcb[0];
   _switch(&current->as);
+  Log("%s:%d schedule: switch to current=%p as=%p tf=%p tf.eip=%p tf.esp=%p",
+      __FILE__, __LINE__, current, current->as.ptr, current->tf,
+      (void *)current->tf->eip, (void *)current->tf->esp);
   return current->tf;
 }

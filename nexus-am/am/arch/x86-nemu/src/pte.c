@@ -97,50 +97,31 @@ void _unmap(_Protect *p, void *va) {
 }
 
 _RegSet *_umake(_Protect *p, _Area ustack, _Area kstack, void *entry, char *const argv[], char *const envp[]) {
+  (void)p;
   (void)kstack;
   (void)argv;
   (void)envp;
 
   uintptr_t stack_top = (uintptr_t)ustack.end;
-  uintptr_t stack_start = (uintptr_t)ustack.start & ~(PGSIZE - 1);
-  uintptr_t stack_end = (stack_top + PGSIZE - 1) & ~(PGSIZE - 1);
   uintptr_t frame_va = stack_top - 4 * sizeof(uintptr_t);
   uintptr_t tf_va = frame_va - sizeof(_RegSet);
-  uintptr_t tf_page = tf_va & ~(PGSIZE - 1);
-  uintptr_t tf_pa = 0;
 
-  for (uintptr_t va = stack_start; va < stack_end; va += PGSIZE) {
-    void *pa = palloc_f();
-    uintptr_t *page = (uintptr_t *)pa;
-    for (int i = 0; i < PGSIZE / sizeof(uintptr_t); i ++) {
-      page[i] = 0;
-    }
-    _map(p, (void *)va, pa);
-    if (va == tf_page) {
-      tf_pa = (uintptr_t)pa + (tf_va - va);
-    }
-  }
-
-  if (tf_pa == 0) {
-    return NULL;
-  }
-
-  uintptr_t *frame = (uintptr_t *)(tf_pa + sizeof(_RegSet));
+  uintptr_t *frame = (uintptr_t *)frame_va;
   frame[0] = 0;
   frame[1] = 0;
   frame[2] = 0;
   frame[3] = 0;
 
-  _RegSet *tf = (_RegSet *)tf_pa;
+  _RegSet *tf = (_RegSet *)tf_va;
   uintptr_t *regs = (uintptr_t *)tf;
   for (int i = 0; i < (int)(sizeof(_RegSet) / sizeof(uintptr_t)); i ++) {
     regs[i] = 0;
   }
 
-  tf->esp = frame_va;
+  tf->esp = 0;
   tf->eip = (uintptr_t)entry;
   tf->cs = 8;
   tf->eflags = FL_IF | 0x2;
 
-  return (_RegSet *)tf_va;
+  return tf;
 }
