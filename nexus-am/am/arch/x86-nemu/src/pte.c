@@ -110,7 +110,7 @@ _RegSet *_umake(_Protect *p, _Area ustack, _Area kstack, void *entry, char *cons
   tf->edi = 0;
   tf->esi = 0;
   tf->ebp = 0;
-  tf->esp = 0;
+  tf->esp = (uintptr_t)sp;
   tf->ebx = 0;
   tf->edx = 0;
   tf->ecx = 0;
@@ -120,7 +120,7 @@ _RegSet *_umake(_Protect *p, _Area ustack, _Area kstack, void *entry, char *cons
 
   tf->eip = (uintptr_t)entry;
   tf->cs = KSEL(SEG_KCODE);
-  tf->eflags = FL_IF;
+  tf->eflags = FL_IF | 0x2;
 
   return tf;
 }
