@@ -9,7 +9,7 @@ void init_ramdisk(void);
 void init_device(void);
 void init_irq(void);
 void init_fs(void);
-uint32_t loader(_Protect *, const char *);
+void load_prog(const char *);
 
 int main() {
 #ifdef HAS_PTE
@@ -33,9 +33,7 @@ int main() {
   Log("File system initialized");
 
   Log("Loading user program: /bin/dummy");
-  uint32_t entry = loader(NULL, "/bin/dummy");
-  Log("Jumping to entry = 0x%x", entry);
-  ((void (*)(void))entry)();
+  load_prog("/bin/dummy");
 
   panic("Should not reach here");
 }
