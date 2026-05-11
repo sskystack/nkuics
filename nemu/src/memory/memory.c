@@ -68,16 +68,35 @@ static inline paddr_t page_translate(vaddr_t addr, bool is_write) {
 
 uint32_t vaddr_read(vaddr_t addr, int len) {
   assert(len >= 1 && len <= 4);
-  assert(OFF(addr) + len <= PAGE_SIZE);
 
-  paddr_t paddr = page_translate(addr, false);
-  return paddr_read(paddr, len);
+  uint32_t data = 0;
+  int read_bytes = 0;
+  while (read_bytes < len) {
+    int chunk = PAGE_SIZE - OFF(addr + read_bytes);
+    if (chunk > len - read_bytes) {
+      chunk = len - read_bytes;
+    }
+
+    paddr_t paddr = page_translate(addr + read_bytes, false);
+    data |= paddr_read(paddr, chunk) << (read_bytes * 8);
+    read_bytes += chunk;
+  }
+  return data;
 }
 
 void vaddr_write(vaddr_t addr, int len, uint32_t data) {
   assert(len >= 1 && len <= 4);
-  assert(OFF(addr) + len <= PAGE_SIZE);
 
-  paddr_t paddr = page_translate(addr, true);
-  paddr_write(paddr, len, data);
+  int written_bytes = 0;
+  while (written_bytes < len) {
+    int chunk = PAGE_SIZE - OFF(addr + written_bytes);
+    if (chunk > len - written_bytes) {
+      chunk = len - written_bytes;
+    }
+
+    paddr_t paddr = page_translate(addr + written_bytes, true);
+    paddr_write(paddr, chunk, (data >> (written_bytes * 8)) &
+        (~0u >> ((4 - chunk) << 3)));
+    written_bytes += chunk;
+  }
 }
