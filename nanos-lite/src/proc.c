@@ -24,6 +24,7 @@ void load_prog(const char *filename) {
   kstack.end = kstack.start + sizeof(pcb[i].stack);
 
   pcb[i].tf = _umake(&pcb[i].as, ustack, kstack, (void *)entry, NULL, NULL);
+  current = NULL;
 }
 
 _RegSet* schedule(_RegSet *prev) {
