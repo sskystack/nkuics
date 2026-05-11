@@ -49,6 +49,9 @@ void _pte_init(void* (*palloc)(), void (*pfree)(void*)) {
 void _protect(_Protect *p) {
   PDE *updir = (PDE*)(palloc_f());
   p->ptr = updir;
+  for (int i = 0; i < NR_PDE; i ++) {
+    updir[i] = 0;
+  }
   // map kernel space
   for (int i = 0; i < NR_PDE; i ++) {
     updir[i] = kpdirs[i];
@@ -66,9 +69,31 @@ void _switch(_Protect *p) {
 }
 
 void _map(_Protect *p, void *va, void *pa) {
+  PDE *pdir = (PDE *)p->ptr;
+  uint32_t pdir_idx = PDX(va);
+  uint32_t ptab_idx = PTX(va);
+
+  if (!(pdir[pdir_idx] & PTE_P)) {
+    PTE *ptab = (PTE *)palloc_f();
+    for (int i = 0; i < NR_PTE; i ++) {
+      ptab[i] = 0;
+    }
+    pdir[pdir_idx] = (uintptr_t)ptab | PTE_P | PTE_W | PTE_U;
+  }
+
+  PTE *ptab = (PTE *)PTE_ADDR(pdir[pdir_idx]);
+  ptab[ptab_idx] = (uintptr_t)pa | PTE_P | PTE_W | PTE_U;
 }
 
 void _unmap(_Protect *p, void *va) {
+  PDE *pdir = (PDE *)p->ptr;
+  uint32_t pdir_idx = PDX(va);
+  uint32_t ptab_idx = PTX(va);
+
+  if (pdir[pdir_idx] & PTE_P) {
+    PTE *ptab = (PTE *)PTE_ADDR(pdir[pdir_idx]);
+    ptab[ptab_idx] = 0;
+  }
 }
 
 _RegSet *_umake(_Protect *p, _Area ustack, _Area kstack, void *entry, char *const argv[], char *const envp[]) {
