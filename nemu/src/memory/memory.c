@@ -13,9 +13,6 @@ uint8_t pmem[PMEM_SIZE];
 /* Memory accessing interfaces */
 
 #define CR0_PG_MASK 0x80000000
-#define PTE_P_MASK  0x001
-#define PTE_A_MASK  0x020
-#define PTE_D_MASK  0x040
 #define PTE_ADDR(x) ((x) & ~PAGE_MASK)
 #define PDX(addr)   (((addr) >> 22) & 0x3ff)
 #define PTX(addr)   (((addr) >> 12) & 0x3ff)
@@ -70,17 +67,17 @@ static inline paddr_t page_translate(vaddr_t addr, bool is_write) {
 }
 
 uint32_t vaddr_read(vaddr_t addr, int len) {
-  uint32_t data = 0;
-  for (int i = 0; i < len; i ++) {
-    paddr_t paddr = page_translate(addr + i, false);
-    data |= paddr_read(paddr, 1) << (i * 8);
-  }
-  return data;
+  assert(len >= 1 && len <= 4);
+  assert(OFF(addr) + len <= PAGE_SIZE);
+
+  paddr_t paddr = page_translate(addr, false);
+  return paddr_read(paddr, len);
 }
 
 void vaddr_write(vaddr_t addr, int len, uint32_t data) {
-  for (int i = 0; i < len; i ++) {
-    paddr_t paddr = page_translate(addr + i, true);
-    paddr_write(paddr, 1, (data >> (i * 8)) & 0xff);
-  }
+  assert(len >= 1 && len <= 4);
+  assert(OFF(addr) + len <= PAGE_SIZE);
+
+  paddr_t paddr = page_translate(addr, true);
+  paddr_write(paddr, len, data);
 }
