@@ -1,10 +1,14 @@
 #include "common.h"
 
 _RegSet* do_syscall(_RegSet *r);
+_RegSet* schedule(_RegSet *prev);
 
 static _RegSet* do_event(_Event e, _RegSet* r) {
   switch (e.event) {
     case _EVENT_IRQ_TIME: return r;
+    case _EVENT_TRAP:
+      Log("Kernel trap event received");
+      return r;
     case _EVENT_SYSCALL: return do_syscall(r);
     default: panic("Unhandled event ID = %d", e.event);
   }

@@ -33,5 +33,5 @@ void dev_raise_intr() {
   if (cpu.IF == 0) {
     return;
   }
-  raise_intr(0x81, cpu.eip);
+  raise_intr(32, cpu.eip);
 }
