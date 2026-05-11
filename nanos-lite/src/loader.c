@@ -30,6 +30,11 @@ uintptr_t loader(_Protect *as, const char *filename) {
 
       _map(as, DEFAULT_ENTRY + off, pa);
     }
+
+    if (current != NULL) {
+      uintptr_t brk = (uintptr_t)DEFAULT_ENTRY + img_size;
+      current->cur_brk = current->max_brk = brk;
+    }
   }
 
   fs_close(fd);
