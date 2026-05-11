@@ -105,6 +105,7 @@ _RegSet *_umake(_Protect *p, _Area ustack, _Area kstack, void *entry, char *cons
   *(--sp) = 0;
   *(--sp) = 0;
   *(--sp) = 0;
+  *(--sp) = 0;
 
   _RegSet *tf = (_RegSet *)((uintptr_t)sp - sizeof(_RegSet));
   tf->edi = 0;
