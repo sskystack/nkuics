@@ -34,7 +34,36 @@ FLOAT F_mul_F(FLOAT a, FLOAT b) {
 
 FLOAT F_div_F(FLOAT a, FLOAT b) {
   assert(b != 0);
-  return ((a / b) << 16) + (((a % b) << 16) / b);
+  int sign = 1;
+  uint32_t x, y;
+
+  if (a < 0) {
+    sign = -sign;
+    x = -a;
+  } else {
+    x = a;
+  }
+
+  if (b < 0) {
+    sign = -sign;
+    y = -b;
+  } else {
+    y = b;
+  }
+
+  uint32_t result = x / y;
+  uint32_t rem = x % y;
+
+  for (int i = 0; i < 16; i ++) {
+    rem <<= 1;
+    result <<= 1;
+    if (rem >= y) {
+      rem -= y;
+      result ++;
+    }
+  }
+
+  return sign < 0 ? -(FLOAT)result : (FLOAT)result;
 }
 
 FLOAT f2F(float a) {
