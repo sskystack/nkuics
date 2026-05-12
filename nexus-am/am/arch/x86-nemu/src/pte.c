@@ -49,6 +49,9 @@ void _pte_init(void* (*palloc)(), void (*pfree)(void*)) {
 void _protect(_Protect *p) {
   PDE *updir = (PDE*)(palloc_f());
   p->ptr = updir;
+  for (int i = 0; i < NR_PDE; i ++) {
+    updir[i] = 0;
+  }
   // map kernel space
   for (int i = 0; i < NR_PDE; i ++) {
     updir[i] = kpdirs[i];
@@ -99,27 +102,25 @@ _RegSet *_umake(_Protect *p, _Area ustack, _Area kstack, void *entry, char *cons
   (void)argv;
   (void)envp;
 
-  uintptr_t *sp = (uintptr_t *)ustack.end;
+  uintptr_t stack_top = (uintptr_t)ustack.end;
+  uintptr_t frame_va = stack_top - 4 * sizeof(uintptr_t);
+  uintptr_t tf_va = frame_va - sizeof(_RegSet);
 
-  *(--sp) = 0;
-  *(--sp) = 0;
-  *(--sp) = 0;
-  *(--sp) = 0;
+  uintptr_t *frame = (uintptr_t *)frame_va;
+  frame[0] = 0;
+  frame[1] = 0;
+  frame[2] = 0;
+  frame[3] = 0;
 
-  _RegSet *tf = (_RegSet *)((uintptr_t)sp - sizeof(_RegSet));
-  tf->edi = 0;
-  tf->esi = 0;
-  tf->ebp = 0;
+  _RegSet *tf = (_RegSet *)tf_va;
+  uintptr_t *regs = (uintptr_t *)tf;
+  for (int i = 0; i < (int)(sizeof(_RegSet) / sizeof(uintptr_t)); i ++) {
+    regs[i] = 0;
+  }
+
   tf->esp = 0;
-  tf->ebx = 0;
-  tf->edx = 0;
-  tf->ecx = 0;
-  tf->eax = 0;
-  tf->irq = 0;
-  tf->error_code = 0;
-
   tf->eip = (uintptr_t)entry;
-  tf->cs = 0;
+  tf->cs = 8;
   tf->eflags = FL_IF | 0x2;
 
   return tf;

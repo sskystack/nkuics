@@ -13,9 +13,6 @@ uint8_t pmem[PMEM_SIZE];
 /* Memory accessing interfaces */
 
 #define CR0_PG_MASK 0x80000000
-#define PTE_P_MASK  0x001
-#define PTE_A_MASK  0x020
-#define PTE_D_MASK  0x040
 #define PTE_ADDR(x) ((x) & ~PAGE_MASK)
 #define PDX(addr)   (((addr) >> 22) & 0x3ff)
 #define PTX(addr)   (((addr) >> 12) & 0x3ff)
@@ -47,7 +44,9 @@ static inline paddr_t page_translate(vaddr_t addr, bool is_write) {
   paddr_t pde_addr = pdir_base + PDX(addr) * sizeof(PDE);
   PDE pde;
   pde.val = paddr_read(pde_addr, sizeof(PDE));
-  assert(pde.present);
+  Assert(pde.present,
+      "invalid PDE: vaddr=0x%08x cr3=0x%08x eip=0x%08x esp=0x%08x pde_idx=%u pde_addr=0x%08x pde=0x%08x",
+      addr, cpu.cr3.val, cpu.eip, cpu.esp, PDX(addr), pde_addr, pde.val);
 
   if (!pde.accessed) {
     pde.accessed = 1;
@@ -58,7 +57,9 @@ static inline paddr_t page_translate(vaddr_t addr, bool is_write) {
   paddr_t pte_addr = ptab_base + PTX(addr) * sizeof(PTE);
   PTE pte;
   pte.val = paddr_read(pte_addr, sizeof(PTE));
-  assert(pte.present);
+  Assert(pte.present,
+      "invalid PTE: vaddr=0x%08x cr3=0x%08x eip=0x%08x esp=0x%08x pde_idx=%u pte_idx=%u pte_addr=0x%08x pte=0x%08x",
+      addr, cpu.cr3.val, cpu.eip, cpu.esp, PDX(addr), PTX(addr), pte_addr, pte.val);
 
   pte.accessed = 1;
   if (is_write) {
@@ -70,17 +71,36 @@ static inline paddr_t page_translate(vaddr_t addr, bool is_write) {
 }
 
 uint32_t vaddr_read(vaddr_t addr, int len) {
+  assert(len >= 1 && len <= 4);
+
   uint32_t data = 0;
-  for (int i = 0; i < len; i ++) {
-    paddr_t paddr = page_translate(addr + i, false);
-    data |= paddr_read(paddr, 1) << (i * 8);
+  int read_bytes = 0;
+  while (read_bytes < len) {
+    int chunk = PAGE_SIZE - OFF(addr + read_bytes);
+    if (chunk > len - read_bytes) {
+      chunk = len - read_bytes;
+    }
+
+    paddr_t paddr = page_translate(addr + read_bytes, false);
+    data |= paddr_read(paddr, chunk) << (read_bytes * 8);
+    read_bytes += chunk;
   }
   return data;
 }
 
 void vaddr_write(vaddr_t addr, int len, uint32_t data) {
-  for (int i = 0; i < len; i ++) {
-    paddr_t paddr = page_translate(addr + i, true);
-    paddr_write(paddr, 1, (data >> (i * 8)) & 0xff);
+  assert(len >= 1 && len <= 4);
+
+  int written_bytes = 0;
+  while (written_bytes < len) {
+    int chunk = PAGE_SIZE - OFF(addr + written_bytes);
+    if (chunk > len - written_bytes) {
+      chunk = len - written_bytes;
+    }
+
+    paddr_t paddr = page_translate(addr + written_bytes, true);
+    paddr_write(paddr, chunk, (data >> (written_bytes * 8)) &
+        (~0u >> ((4 - chunk) << 3)));
+    written_bytes += chunk;
   }
 }

@@ -223,6 +223,8 @@ static inline void update_eip(void) {
   cpu.eip = (decoding.is_jmp ? (decoding.is_jmp = 0, decoding.jmp_eip) : decoding.seq_eip);
 }
 
+#define TIMER_IRQ 32
+
 void exec_wrapper(bool print_flag) {
 #ifdef DEBUG
   decoding.p = decoding.asm_buf;
@@ -247,6 +249,12 @@ void exec_wrapper(bool print_flag) {
 #endif
 
   update_eip();
+
+  if (cpu.INTR && cpu.IF) {
+    cpu.INTR = false;
+    raise_intr(TIMER_IRQ, cpu.eip);
+    update_eip();
+  }
 
 #ifdef DIFF_TEST
   void difftest_step(uint32_t);
