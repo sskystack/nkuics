@@ -1,11 +1,10 @@
-#include "common.h"
-#include "fs.h"
-#include "memory.h"
 #include "proc.h"
+#include "fs.h"
 
 #define DEFAULT_ENTRY ((void *)0x8048000)
 
 uintptr_t loader(_Protect *as, const char *filename) {
+
   if (filename == NULL) {
     filename = "/bin/bmptest";
   }
@@ -29,12 +28,13 @@ uintptr_t loader(_Protect *as, const char *filename) {
       size_t nread = fs_read(fd, pa, len);
       assert(nread == len);
 
-      _map(as, (void *)((uintptr_t)DEFAULT_ENTRY + off), pa);
+      _map(as, DEFAULT_ENTRY + off, pa);
     }
 
     if (current != NULL) {
-      current->cur_brk = PGROUNDUP((uintptr_t)DEFAULT_ENTRY + img_size);
-      current->max_brk = current->cur_brk;
+      uintptr_t brk = (uintptr_t)DEFAULT_ENTRY + img_size;
+      current->cur_brk = brk;
+      current->max_brk = PGROUNDUP(brk);
     }
   }
 
