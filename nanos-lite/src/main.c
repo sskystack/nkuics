@@ -34,8 +34,6 @@ int main() {
 
   Log("Loading user program: /bin/pal");
   load_prog("/bin/pal");
-  Log("Loading user program: /bin/hello");
-  load_prog("/bin/hello");
   _trap();
 
   panic("Should not reach here");
