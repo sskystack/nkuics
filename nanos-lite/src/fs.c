@@ -48,13 +48,6 @@ int fs_open(const char *pathname, int flags, int mode) {
 size_t fs_read(int fd, void *buf, size_t len) {
   assert(fd >= 0 && fd < NR_FILES);
 
-  static int fs_read_log_cnt = 0;
-  if (fs_read_log_cnt < 80 || fd == FD_EVENTS || fd == FD_DISPINFO) {
-    Log("%s:%d fs_read enter: fd=%d buf=%p len=%d open_offset=%d",
-        __FILE__, __LINE__, fd, buf, len, file_table[fd].open_offset);
-  }
-  fs_read_log_cnt++;
-
   if (fd == FD_STDIN) return 0;
   if (fd == FD_EVENTS) return events_read(buf, len);
 
@@ -77,13 +70,6 @@ size_t fs_read(int fd, void *buf, size_t len) {
 size_t fs_write(int fd, const void *buf, size_t len) {
   assert(fd >= 0 && fd < NR_FILES);
 
-  static int fs_write_log_cnt = 0;
-  if (fs_write_log_cnt < 80 || fd == FD_FB) {
-    Log("%s:%d fs_write enter: fd=%d buf=%p len=%d open_offset=%d",
-        __FILE__, __LINE__, fd, buf, len, file_table[fd].open_offset);
-  }
-  fs_write_log_cnt++;
-
   if (fd == FD_STDOUT || fd == FD_STDERR) {
     const char *p = (const char *)buf;
     for (size_t i = 0; i < len; i++) {
@@ -94,14 +80,9 @@ size_t fs_write(int fd, const void *buf, size_t len) {
 
   Finfo *f = &file_table[fd];
   if (fd == FD_FB) {
-    static int fb_log_cnt = 0;
     if (f->open_offset >= (off_t)f->size) return 0;
     if (f->open_offset + len > f->size) {
       len = f->size - f->open_offset;
-    }
-    if (fb_log_cnt < 5) {
-      Log("fs_write: /dev/fb offset=%d len=%d", f->open_offset, len);
-      fb_log_cnt++;
     }
     len = fb_write(buf, f->open_offset, len);
     f->open_offset += len;
